@@ -45,11 +45,24 @@ function App() {
 
   const [skills, setSkills] = useState(["React", "JavaScript"]);
   const [newSkill, setNewSkill] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
   const addSkill = () => {
     if (newSkill.trim() !== "") {
       setSkills([...skills, newSkill]);
       setNewSkill("");
     }
+  };
+
+  const filteredSkills = skills
+    .map((skill, index) => ({ skill, index }))
+    .filter((item) =>
+      item.skill.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+  const deleteSkill = (indexToDelete) => {
+    const updatedSkills = skills.filter((_, index) => index !== indexToDelete);
+    setSkills(updatedSkills);
   };
 
   return (
@@ -71,6 +84,14 @@ function App() {
         <div className="input-group">
           <input
             className="skill-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search skills..."
+          />
+        </div>
+        <div className="input-group">
+          <input
+            className="skill-input"
             value={newSkill}
             onChange={(e) => setNewSkill(e.target.value)}
             placeholder="Add a skill"
@@ -80,37 +101,58 @@ function App() {
           </button>
         </div>
         <ul className="skills-list">
-          {skills.map((skill, index) => (
+          {filteredSkills.map(({ skill, index }) => (
             <li key={index} className="skill-item">
-              {skill}
+              {skill === "React" ? <strong>{skill}</strong> : skill}
+              <button
+                onClick={() => deleteSkill(index)}
+                style={{
+                  background: "#ff4d4f",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "18px",
+                  height: "18px",
+                  fontSize: "10px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0,
+                }}
+              >
+                X
+              </button>
             </li>
           ))}
         </ul>
       </div>
 
-      <ProfileCard
-        name="Pannawich Wontien"
-        role="Full Stack Developer"
-        bio="A passionate developer with a love for coding and technology."
-      />
-
-      <ProfileCard
-        name="Jane Doe"
-        role="UI/UX Designer"
-        bio="Creative designer focused on user-centered design."
-      />
-
-      {loading ? (
-        <p>Loading...</p>
-      ) : error ? (
-        <p>Error: {error.message}</p>
-      ) : githubData ? (
+      <div className="cards-container">
         <ProfileCard
-          name={githubData.name || githubData.login}
-          role="GitHub User"
-          bio={githubData.bio || "No bio available."}
+          name="Pannawich Wontien"
+          role="Full Stack Developer"
+          bio="A passionate developer with a love for coding and technology."
         />
-      ) : null}
+
+        <ProfileCard
+          name="Jane Doe"
+          role="UI/UX Designer"
+          bio="Creative designer focused on user-centered design."
+        />
+
+        {loading ? (
+          <div className="loading-card">Loading...</div>
+        ) : error ? (
+          <div className="error-card">Error: {error.message}</div>
+        ) : githubData ? (
+          <ProfileCard
+            name={githubData.name || githubData.login}
+            role="GitHub User"
+            bio={githubData.bio || "No bio available."}
+          />
+        ) : null}
+      </div>
     </div>
   );
 }
